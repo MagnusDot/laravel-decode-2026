@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\todo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -52,5 +53,10 @@ class User extends Authenticatable
     public function todos()
     {
         return $this->hasMany(todo::class);
+    }
+
+    public function completedTodos(): BelongsToMany
+    {
+        return $this->belongsToMany(todo::class, 'actions', 'user_id', 'todo_id')->withTimestamps();
     }
 }

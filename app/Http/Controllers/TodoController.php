@@ -9,8 +9,14 @@ use Auth;
 class TodoController extends Controller
 {
     public function index(){
-        $todos = Auth::user()->todos;
-        return view('Todo.index', ['all' => $todos]);
+        $user = Auth::user();
+        $todos = $user->todos;
+        $doneTodoIds = $user->completedTodos()->pluck('todos.id')->toArray();
+
+        return view('Todo.index', [
+            'all' => $todos,
+            'doneTodoIds' => $doneTodoIds,
+        ]);
     }
 
     public function create(){
@@ -41,6 +47,17 @@ class TodoController extends Controller
 
     public function destroy(todo $todo){
         $todo->delete();
+        return redirect('/todos');
+    }
+
+    public function markDone(todo $todo)
+    {
+        if ($todo->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        Auth::user()->completedTodos()->syncWithoutDetaching([$todo->id]);
+
         return redirect('/todos');
     }
 }
